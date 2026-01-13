@@ -8,7 +8,7 @@ import assemblyai as aai
 import os
 
 # ================= GOOGLE CREDENTIALS =================
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"C:\gradio_apps\credentials\global-standard-464504-c2-51e5bcd2f6f5.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"C:\gradio_apps\credentials\global-standard-464504-c2-5b818160e07c.json"
 
 # ================= API KEYS =================
 ASSEMBLYAI_API_KEY = "08462ccdabeb4b9293eeef620c728e4d"
@@ -25,17 +25,6 @@ LANG_MAP = {
 }
 
 TARGET_LANGUAGES = ["Hindi", "Telugu", "Tamil", "Kannada", "Malayalam", "Bengali"]
-
-# ================= ASSEMBLYAI LANGUAGE MAP =================
-ASSEMBLYAI_LANG_MAP = {
-    "en": "en",
-    "hi": "hi",
-    "te": "te",
-    "ta": "ta",
-    "kn": "kn",
-    "ml": "ml",
-    "bn": "bn"
-}
 
 # ================= TRANSLITERATION =================
 def transliterate_to_native(text, lang_code):
@@ -55,19 +44,12 @@ def transliterate_to_native(text, lang_code):
 def audio_transcription(audio_file, lang_code):
     aai.settings.api_key = ASSEMBLYAI_API_KEY
     transcriber = aai.Transcriber()
+    config = aai.TranscriptionConfig(language_code=lang_code)
+    transcript = transcriber.transcribe(audio_file, config=config)
 
-    assembly_lang = ASSEMBLYAI_LANG_MAP.get(lang_code, "en")
-    
-    try:
-        transcript = transcriber.transcribe(
-            audio_file, 
-            config=aai.TranscriptionConfig(language_code=assembly_lang)
-        )
-        if transcript.status == aai.TranscriptStatus.error:
-            return f"Error: {transcript.error}"
-        return transcript.text
-    except Exception as e:
-        return f"Error in transcription: {e}"
+    if transcript.status == aai.TranscriptStatus.error:
+        return f"Error: {transcript.error}"
+    return transcript.text
 
 # ================= FILE READ =================
 def read_text_file(file):
@@ -126,7 +108,6 @@ def process_input(input_type, input_language, audio_file, text_file, manual_text
     src_code = LANG_MAP[input_language]
     tgt_code = LANG_MAP[target_language]
 
-    # Step 1: Get source text
     if input_type == "Audio" and audio_file:
         text = audio_transcription(audio_file, src_code)
     elif input_type == "Text File" and text_file:
@@ -134,20 +115,18 @@ def process_input(input_type, input_language, audio_file, text_file, manual_text
     else:
         text = manual_text.strip()
 
-    # Step 2: Translate text
     translated = translate_text(text, src_code, tgt_code)
-
-    # Step 3: Transliterate to native script
     native_text = transliterate_to_native(translated, tgt_code)
-
-    # Step 4: Generate speech
     audio_path = text_to_speech_google(native_text, tgt_code)
 
-    # Step 5: Adjust textbox lines
     lines_needed = max(2, min(len(native_text) // 50 + 1, 20))
 
+    # ✅ Use gr.update() instead of gr.Textbox.update()
     return (
-        gr.update(value=f"🔹 {target_language} Translation:\n\n{native_text}", lines=lines_needed),
+        gr.update(
+            value=f"🔹 {target_language} Translation:\n\n{native_text}",
+            lines=lines_needed
+        ),
         audio_path
     )
 
