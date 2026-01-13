@@ -7,11 +7,12 @@ import tempfile
 import assemblyai as aai
 import os
 
-# ================= GOOGLE CREDENTIALS =================
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"C:\gradio_apps\credentials\global-standard-464504-c2-5b818160e07c.json"
+from dotenv import load_dotenv
+load_dotenv()
 
-# ================= API KEYS =================
-ASSEMBLYAI_API_KEY = "08462ccdabeb4b9293eeef620c728e4d"
+ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY")
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+PROJECT_ID = os.getenv("GOOGLE_PROJECT_ID")
 
 # ================= LANGUAGE MAP =================
 LANG_MAP = {
@@ -59,7 +60,7 @@ def read_text_file(file):
 # ================= GOOGLE TRANSLATION =================
 def translate_text(text, src_code, tgt_code):
     client = TranslationServiceClient()
-    parent = "projects/global-standard-464504-c2/locations/global"  # Your Project ID
+    parent = f"projects/{PROJECT_ID}/locations/global" # Your Project ID
 
     response = client.translate_text(
         request={
