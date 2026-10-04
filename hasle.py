@@ -8,6 +8,7 @@ import assemblyai as aai
 import os
 
 from dotenv import load_dotenv
+
 load_dotenv(override=True)
 
 
@@ -18,6 +19,12 @@ GOOGLE_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 if GOOGLE_CREDENTIALS:
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_CREDENTIALS
+
+load_dotenv()
+
+ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY")
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+PROJECT_ID = os.getenv("GOOGLE_PROJECT_ID")
 # ================= LANGUAGE MAP =================
 LANG_MAP = {
     "English": "en",
@@ -169,11 +176,12 @@ with gr.Blocks() as demo:
 
 # ================= LAUNCH =================
 if __name__ == "__main__":
-   demo.launch(
-    server_name="0.0.0.0",
-    server_port=int(os.environ.get("PORT", 7860)),
-    share=False,
-    pwa=True,
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=int(os.environ.get("PORT", 7860)),
+        share=False,
+        pwa=True,
+
         css="""
         .gradio-container { background-color: #f0f4ff !important; padding: 20px; }
         .gr-button { background-color: #1e3a8a !important; color: white !important; font-weight: bold !important; border-radius: 12px !important; }
@@ -182,4 +190,6 @@ if __name__ == "__main__":
         label { font-weight: bold !important; color: #1e3a8a !important; }
         """
     )
+
+
 
